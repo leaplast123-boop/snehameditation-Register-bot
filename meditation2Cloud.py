@@ -44,7 +44,7 @@ def self_ping():
 
 # Configuration
 BOT_TOKEN = os.getenv("BOT_TOKEN", "8847191622:AAHB_bxtk_XxlC9GoHvmw5RnvEg8jXCdc8s")
-ADMIN_CHAT_ID = os.getenv("ADMIN_CHAT_ID", "1199886518")
+ADMIN_CHAT_ID = os.getenv("ADMIN_CHAT_ID", "528763406")
 
 # Your verified Google Sheet Web App URL
 GOOGLE_SHEET_WEB_APP_URL = "https://script.google.com/macros/s/AKfycbxqQBM2ZI-Zu0_X3esVLD7knSQkrjGdwX41ZFZMuP75IJ8xRL7jOWbXWQKHpLqfM--XvQ/exec"
