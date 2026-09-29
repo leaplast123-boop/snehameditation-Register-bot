@@ -69,13 +69,13 @@ TEXTS = {
         'confirm_receipt': "Thank you! Sneha team will contact you shortly.\nFor more detail, please contact: @SnehaCentreCambodia",
         'voice_warning': "⚠️ Please send text messages only, voice notes are not supported. Please type your response:",
         'admin_notification': "🚨 <b>New Meditation Registration</b> (#{count}/40)\n\n"
-                             "<b>Name:</b> {name}\n"
-                             "<b>Gender:</b> {gender}\n"
-                             "<b>Age:</b> {age}\n"
-                             "<b>Phone:</b> {phone}\n"
-                             "<b>Expectation:</b> {expectation}\n"
-                             "<b>Telegram:</b> {tg_user}\n"
-                             "<b>Language:</b> English"
+                           "<b>Name:</b> {name}\n"
+                           "<b>Gender:</b> {gender}\n"
+                           "<b>Age:</b> {age}\n"
+                           "<b>Phone:</b> {phone}\n"
+                           "<b>Expectation:</b> {expectation}\n"
+                           "<b>Telegram:</b> {tg_user}\n"
+                           "<b>Language:</b> English"
     },
     'KM': {
         'sold_out': "សូមអភ័យទោស! វគ្គសមាធិនេះបានពេញចំនួនកំណត់ ៤០ នាក់ហើយ។ សូមរង់ចាំការចុះឈ្មោះសម្រាប់ព្រឹត្តិការណ៍បន្ទាប់!",
@@ -88,13 +88,13 @@ TEXTS = {
         'confirm_receipt': "សូមអរគុណ! ក្រុមការងារ មជ្ឈមណ្ឌលស្នេហា នឹងទាក់ទងទៅអ្នកក្នុងពេលឆាប់ៗនេះ។\nសម្រាប់ព័ត៌មានបន្ថែម សូមទាក់ទង៖ @SnehaCentreCambodia",
         'voice_warning': "⚠️ សូមផ្ញើជាសារអក្សរ។ សូមវាយបញ្ចូលចម្លើយរបស់អ្នកម្ដងទៀត៖",
         'admin_notification': "🚨 <b>ការចុះឈ្មោះសមាធិថ្មី</b> (#{count}/40)\n\n"
-                             "<b>ឈ្មោះ:</b> {name}\n"
-                             "<b>ភេទ:</b> {gender}\n"
-                             "<b>អាយុ:</b> {age}\n"
-                             "<b>លេខទូរស័ព្ទ:</b> {phone}\n"
-                             "<b>ការរំពឹងទុក:</b> {expectation}\n"
-                             "<b>តេឡេក្រាម:</b> {tg_user}\n"
-                             "<b>ភាសា:</b> ខ្មែរ"
+                           "<b>ឈ្មោះ:</b> {name}\n"
+                           "<b>ភេទ:</b> {gender}\n"
+                           "<b>អាយុ:</b> {age}\n"
+                           "<b>លេខទូរស័ព្ទ:</b> {phone}\n"
+                           "<b>ការរំពឹងទុក:</b> {expectation}\n"
+                           "<b>តេឡេក្រាម:</b> {tg_user}\n"
+                           "<b>ភាសា:</b> ខ្មែរ"
     }
 }
 
@@ -148,12 +148,17 @@ async def start(update: Update, context: ContextTypes.DEFAULT_TYPE):
     return LANGUAGE
 
 async def set_language(update: Update, context: ContextTypes.DEFAULT_TYPE):
-    query = update.callback_query
-    await query.answer()
-    lang = query.data
-    context.user_data['lang'] = lang
-    await query.edit_message_text(text=TEXTS[lang]['ask_name'])
-    return NAME
+    try:
+        query = update.callback_query
+        await query.answer()
+        lang = query.data
+        context.user_data['lang'] = lang
+        print(f"Language selected: {lang}")
+        await query.edit_message_text(text=TEXTS[lang]['ask_name'])
+        return NAME
+    except Exception as e:
+        print(f"CRITICAL ERROR in set_language: {e}")
+        raise
 
 async def handle_voice_input(update: Update, context: ContextTypes.DEFAULT_TYPE):
     lang = context.user_data.get('lang', 'KM')
