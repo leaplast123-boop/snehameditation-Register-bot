@@ -43,7 +43,7 @@ def self_ping():
         time.sleep(600)  # Ping every 10 minutes
 
 # Configuration
-BOT_TOKEN = os.getenv("BOT_TOKEN", "8847191622:AAHB_bxtk_XxlC9GoHvmw5RnvEg8jXCdc8s")
+BOT_TOKEN = os.getenv("BOT_TOKEN", "8847191622:AAE-GDdrKLtkq1KbUOZKV1ko7xjRGMvh4f4")
 ADMIN_CHAT_ID = os.getenv("ADMIN_CHAT_ID", "528763406")
 
 # Your verified Google Sheet Web App URL
