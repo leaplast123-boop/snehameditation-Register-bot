@@ -307,7 +307,7 @@ def main():
     app.add_handler(CommandHandler("status", check_status))
 
     print("Meditation Bot is running...")
-    app.run_polling(stop_signals=None)
+    app.run_polling(drop_pending_updates=True, stop_signals=None)
 
 if __name__ == '__main__':
     main()
