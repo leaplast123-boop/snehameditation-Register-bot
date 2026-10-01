@@ -47,7 +47,7 @@ BOT_TOKEN = os.getenv("BOT_TOKEN")
 ADMIN_CHAT_ID = os.getenv("ADMIN_CHAT_ID", "528763406")
 
 # Your updated Print Sheet Web App URL
-GOOGLE_SHEET_WEB_APP_URL = "https://script.google.com/macros/s/AKfycbyvHBqPoe-HyMZA7mGDvoVLQKpSgEnUtiypa_J1wXlQ3jIyqGMgwzWFtN7ypXoegKM5Ww/exec"
+GOOGLE_SHEET_WEB_APP_URL = "https://script.google.com/macros/s/AKfycbwjjacRw1-IvXgDHUuEpJqc7aNalE0vPq4Xk8sczT0fCnh415umvnUClgefOeXGi7Zq/exec"
 
 MAX_REGISTRATIONS = 40
 COUNTER_FILE = "counter.json"
