@@ -46,8 +46,8 @@ def self_ping():
 BOT_TOKEN = os.getenv("BOT_TOKEN")
 ADMIN_CHAT_ID = os.getenv("ADMIN_CHAT_ID", "528763406")
 
-# Your verified Google Sheet Web App URL
-GOOGLE_SHEET_WEB_APP_URL = "https://script.google.com/macros/s/AKfycbxqQBM2ZI-Zu0_X3esVLD7knSQkrjGdwX41ZFZMuP75IJ8xRL7jOWbXWQKHpLqfM--XvQ/exec"
+# Your updated Google Sheet Web App URL
+GOOGLE_SHEET_WEB_APP_URL = "https://script.google.com/macros/s/AKfycbxNv4H-mLaSJ3g7AIyHNLGsktaJmha9gDRZ-XL2G47Zsa1K8QZbezS2Bqn8p1dPIDNUag/exec"
 
 MAX_REGISTRATIONS = 40
 COUNTER_FILE = "counter.json"
@@ -69,13 +69,13 @@ TEXTS = {
         'confirm_receipt': "Thank you! Sneha team will contact you shortly.\nFor more detail, please contact: @SnehaCentreCambodia",
         'voice_warning': "⚠️ Please send text messages only, voice notes are not supported. Please type your response:",
         'admin_notification': "🚨 <b>New Meditation Registration</b> (#{count}/40)\n\n"
-                           "<b>Name:</b> {name}\n"
-                           "<b>Gender:</b> {gender}\n"
-                           "<b>Age:</b> {age}\n"
-                           "<b>Phone:</b> {phone}\n"
-                           "<b>Expectation:</b> {expectation}\n"
-                           "<b>Telegram:</b> {tg_user}\n"
-                           "<b>Language:</b> English"
+                            "<b>Name:</b> {name}\n"
+                            "<b>Gender:</b> {gender}\n"
+                            "<b>Age:</b> {age}\n"
+                            "<b>Phone:</b> {phone}\n"
+                            "<b>Expectation:</b> {expectation}\n"
+                            "<b>Telegram:</b> {tg_user}\n"
+                            "<b>Language:</b> English"
     },
     'KM': {
         'sold_out': "សូមអភ័យទោស! វគ្គសមាធិនេះបានពេញចំនួនកំណត់ ៤០ នាក់ហើយ។ សូមរង់ចាំការចុះឈ្មោះសម្រាប់ព្រឹត្តិការណ៍បន្ទាប់!",
@@ -88,13 +88,13 @@ TEXTS = {
         'confirm_receipt': "សូមអរគុណ! ក្រុមការងារ មជ្ឈមណ្ឌលស្នេហា នឹងទាក់ទងទៅអ្នកក្នុងពេលឆាប់ៗនេះ។\nសម្រាប់ព័ត៌មានបន្ថែម សូមទាក់ទង៖ @SnehaCentreCambodia",
         'voice_warning': "⚠️ សូមផ្ញើជាសារអក្សរ។ សូមវាយបញ្ចូលចម្លើយរបស់អ្នកម្ដងទៀត៖",
         'admin_notification': "🚨 <b>ការចុះឈ្មោះសមាធិថ្មី</b> (#{count}/40)\n\n"
-                           "<b>ឈ្មោះ:</b> {name}\n"
-                           "<b>ភេទ:</b> {gender}\n"
-                           "<b>អាយុ:</b> {age}\n"
-                           "<b>លេខទូរស័ព្ទ:</b> {phone}\n"
-                           "<b>ការរំពឹងទុក:</b> {expectation}\n"
-                           "<b>តេឡេក្រាម:</b> {tg_user}\n"
-                           "<b>ភាសា:</b> ខ្មែរ"
+                            "<b>ឈ្មោះ:</b> {name}\n"
+                            "<b>ភេទ:</b> {gender}\n"
+                            "<b>អាយុ:</b> {age}\n"
+                            "<b>លេខទូរស័ព្ទ:</b> {phone}\n"
+                            "<b>ការរំពឹងទុក:</b> {expectation}\n"
+                            "<b>តេឡេក្រាម:</b> {tg_user}\n"
+                            "<b>ភាសា:</b> ខ្មែរ"
     }
 }
 
@@ -119,12 +119,13 @@ def reset_counter_file():
         json.dump({"count": 0}, f)
 
 def save_to_google_sheet(user_data):
-    """Pushes registration data matching columns B through F (Name, Gender, Age, Phone, Receipt)"""
+    """Pushes registration data including Name, Gender, Age, Phone, Expectation, and Receipt"""
     payload = {
         "name": user_data.get("name"),
         "gender": user_data.get("gender"),
         "age": user_data.get("age"),
         "phone": user_data.get("phone"),
+        "expectation": user_data.get("expectation"),
         "receipt": user_data.get("receipt")
     }
     try:
@@ -217,7 +218,7 @@ async def get_payment(update: Update, context: ContextTypes.DEFAULT_TYPE):
     photo = update.message.photo[-1]
     context.user_data['receipt'] = photo.file_id
 
-    # Save to your Google Sheet matching your layout
+    # Save to your Google Sheet including expectation data
     save_to_google_sheet(context.user_data)
 
     new_count = increment_counter()
