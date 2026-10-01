@@ -46,8 +46,8 @@ def self_ping():
 BOT_TOKEN = os.getenv("BOT_TOKEN")
 ADMIN_CHAT_ID = os.getenv("ADMIN_CHAT_ID", "528763406")
 
-# Your correct Print Sheet Web App URL
-GOOGLE_SHEET_WEB_APP_URL = "https://script.google.com/macros/s/AKfycbw75bdtBNSTy_ek8hc2Nwn_-VVxSmD4F-5yEDdk5WHPNtv9qwMQ_HKWtdECBuDSL7RKtw/exec"
+# Your updated Print Sheet Web App URL
+GOOGLE_SHEET_WEB_APP_URL = "https://script.google.com/macros/s/AKfycbyvHBqPoe-HyMZA7mGDvoVLQKpSgEnUtiypa_J1wXlQ3jIyqGMgwzWFtN7ypXoegKM5Ww/exec"
 
 MAX_REGISTRATIONS = 40
 COUNTER_FILE = "counter.json"
@@ -84,7 +84,7 @@ TEXTS = {
         'ask_age': "សូមបញ្ចូលអាយុរបស់អ្នក៖",
         'ask_phone': "សូមបញ្ចូលលេខទូរស័ព្ទរបស់អ្នក៖",
         'ask_expectation': "តើអ្នកមានការរំពឹងទុកអ្វីខ្លះក្នុងការចូលរួមវគ្គនេះ?",
-        'payment_instructions': "តម្លៃចូលរួម: <b>៥ ដុល្លារ/ម្នាក់ (ការបរិច្ចាគនេះនឹងយកទៅប្រើប្រាស់ដើម្បីគាំទ្រសុខភាពផ្លូវចិត្តដល់អ្នកដែលខ្វះខាត)</b>\n\nសូមធ្វើការទូទាត់ប្រាក់តាមរយៈ QR code ខាងក្រោម។\n\n⚠️ <b>សំខាន់៖</b> សូមផ្ញើ <b>រូបថត ឬ Screenshot វិក្កយបត្រទូទាត់ប្រាក់</b> នៅទីនេះ។ យើងខ្ញុំត្រូវការរូបថតវិក្កយបត្រនេះ ដើម្បីផ្ទៀងផ្ទាត់ និងបញ្ជាក់ការចុះឈ្មោះរបស់អ្នក!",
+        'payment_instructions': "តម្លៃចូលរួម: <b>៥ ដុល្លារ/ម្នាក់ (ការបរិច្ចាគនេះនឹងយកទៅប្រើប្រាស់ដើម្បីគាំទ្រសុខភាពផ្លូវចិត្តដល់អ្នកដែលខ្វះខាត)</b>\n\nសូមធ្វើការទូទាត់ប្រាក់តាមរយៈ QR code ខាងក្រោម។\n\n⚠️ <b>សំខាន់៖</b> សូមផ្ញើ <b>រូបថត ឬ Screenshot វិក្កយបត្រទូទាត់ប្រាក់</b> នៅទីយើងខ្ញុំត្រូវការរូបថតវិក្កយបត្រនេះ ដើម្បីផ្ទៀងផ្ទាត់ និងបញ្ជាក់ការចុះឈ្មោះរបស់អ្នក!",
         'confirm_receipt': "សូមអរគុណ! ក្រុមការងារ មជ្ឈមណ្ឌលស្នេហា នឹងទាក់ទងទៅអ្នកក្នុងពេលឆាប់ៗនេះ។\nសម្រាប់ព័ត៌មានបន្ថែម សូមទាក់ទង៖ @SnehaCentreCambodia",
         'voice_warning': "⚠️ សូមផ្ញើជាសារអក្សរ។ សូមវាយបញ្ចូលចម្លើយរបស់អ្នកម្ដងទៀត៖",
         'admin_notification': "🚨 <b>ការចុះឈ្មោះសមាធិថ្មី</b> (#{count}/40)\n\n"
@@ -154,7 +154,6 @@ async def set_language(update: Update, context: ContextTypes.DEFAULT_TYPE):
         await query.answer()
         lang = query.data
         context.user_data['lang'] = lang
-        print(f"Language selected: {lang}")
         await query.edit_message_text(text=TEXTS[lang]['ask_name'])
         return NAME
     except Exception as e:
@@ -218,7 +217,7 @@ async def get_payment(update: Update, context: ContextTypes.DEFAULT_TYPE):
     photo = update.message.photo[-1]
     context.user_data['receipt'] = photo.file_id
 
-    # Save to your Google Sheet including expectation data
+    # Save to your Google Sheet
     save_to_google_sheet(context.user_data)
 
     new_count = increment_counter()
