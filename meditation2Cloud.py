@@ -46,8 +46,8 @@ def self_ping():
 BOT_TOKEN = os.getenv("BOT_TOKEN")
 ADMIN_CHAT_ID = os.getenv("ADMIN_CHAT_ID", "528763406")
 
-# Your updated Google Sheet Web App URL
-GOOGLE_SHEET_WEB_APP_URL = "https://script.google.com/macros/s/AKfycbxNv4H-mLaSJ3g7AIyHNLGsktaJmha9gDRZ-XL2G47Zsa1K8QZbezS2Bqn8p1dPIDNUag/exec"
+# Your correct Print Sheet Web App URL
+GOOGLE_SHEET_WEB_APP_URL = "https://script.google.com/macros/s/AKfycbw75bdtBNSTy_ek8hc2Nwn_-VVxSmD4F-5yEDdk5WHPNtv9qwMQ_HKWtdECBuDSL7RKtw/exec"
 
 MAX_REGISTRATIONS = 40
 COUNTER_FILE = "counter.json"
