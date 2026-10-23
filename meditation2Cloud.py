@@ -3,9 +3,6 @@ import json
 import html
 import time
 import requests
-import threading
-from flask import Flask
-from waitress import serve
 from telegram import Update, InlineKeyboardButton, InlineKeyboardMarkup, ReplyKeyboardRemove
 from telegram.ext import (
     Application,
@@ -17,33 +14,8 @@ from telegram.ext import (
     filters,
 )
 
-# 1. Flask Web Server Setup
-web_app = Flask(__name__)
-
-@web_app.route('/')
-def health_check():
-    return "Bot is alive and running!", 200
-
-def run_flask():
-    port = int(os.environ.get("PORT", 10000))
-    serve(web_app, host="0.0.0.0", port=port)
-
-def self_ping():
-    """Internal ping service to prevent thread idle drops."""
-    render_url = os.environ.get("RENDER_EXTERNAL_URL")
-    if not render_url:
-        return
-    
-    time.sleep(15)  
-    while True:
-        try:
-            requests.get(render_url, timeout=10)
-        except Exception:
-            pass
-        time.sleep(600)  # Ping every 10 minutes
-
 # Configuration
-BOT_TOKEN = os.getenv("8918523178:AAGbCHDffx0BdSB9edAC8xX27Y7CNyTjt_U")
+BOT_TOKEN = "8918523178:AAGbCHDffx0BdSB9edAC8xX27Y7CNyTjt_U"
 ADMIN_CHAT_ID = os.getenv("ADMIN_CHAT_ID", "528763406")
 
 # Your updated Print Sheet Web App URL
@@ -239,75 +211,3 @@ async def get_payment(update: Update, context: ContextTypes.DEFAULT_TYPE):
         expectation=context.user_data['expectation'],
         tg_user=tg_user
     )
-    
-    await context.bot.send_photo(
-        chat_id=ADMIN_CHAT_ID,
-        photo=photo.file_id,
-        caption=admin_text,
-        parse_mode="HTML"
-    )
-    return ConversationHandler.END
-
-async def reset_counter(update: Update, context: ContextTypes.DEFAULT_TYPE):
-    if str(update.effective_user.id) != str(ADMIN_CHAT_ID):
-        return
-    reset_counter_file()
-    await update.message.reply_text("🔄 Registration counter has been reset to 0 for the next event!")
-
-async def check_status(update: Update, context: ContextTypes.DEFAULT_TYPE):
-    if str(update.effective_user.id) != str(ADMIN_CHAT_ID):
-        return
-    count = get_counter()
-    await update.message.reply_text(f"📊 Current Registrations: {count}/40")
-
-async def cancel(update: Update, context: ContextTypes.DEFAULT_TYPE):
-    await update.message.reply_text("Registration cancelled.", reply_markup=ReplyKeyboardRemove())
-    return ConversationHandler.END
-
-def main():
-    threading.Thread(target=run_flask, daemon=True).start()
-    threading.Thread(target=self_ping, daemon=True).start()
-
-    app = Application.builder().token(BOT_TOKEN).build()
-
-    conv_handler = ConversationHandler(
-        entry_points=[CommandHandler('start', start)],
-        states={
-            LANGUAGE: [CallbackQueryHandler(set_language)],
-            NAME: [
-                MessageHandler(filters.VOICE | filters.AUDIO, handle_voice_input),
-                MessageHandler(filters.TEXT & ~filters.COMMAND, get_name)
-            ],
-            GENDER: [
-                MessageHandler(filters.VOICE | filters.AUDIO, handle_voice_input),
-                MessageHandler(filters.TEXT & ~filters.COMMAND, get_gender)
-            ],
-            AGE: [
-                MessageHandler(filters.VOICE | filters.AUDIO, handle_voice_input),
-                MessageHandler(filters.TEXT & ~filters.COMMAND, get_age)
-            ],
-            PHONE: [
-                MessageHandler(filters.VOICE | filters.AUDIO, handle_voice_input),
-                MessageHandler(filters.TEXT & ~filters.COMMAND, get_phone)
-            ],
-            EXPECTATION: [
-                MessageHandler(filters.VOICE | filters.AUDIO, handle_voice_input),
-                MessageHandler(filters.TEXT & ~filters.COMMAND, get_expectation)
-            ],
-            PAYMENT: [
-                MessageHandler(filters.VOICE | filters.AUDIO, handle_voice_input),
-                MessageHandler(filters.PHOTO, get_payment)
-            ],
-        },
-        fallbacks=[CommandHandler('cancel', cancel)],
-    )
-
-    app.add_handler(conv_handler)
-    app.add_handler(CommandHandler("reset", reset_counter))
-    app.add_handler(CommandHandler("status", check_status))
-
-    print("Meditation Bot is running...")
-    app.run_polling(drop_pending_updates=True, stop_signals=None)
-
-if __name__ == '__main__':
-    main()
