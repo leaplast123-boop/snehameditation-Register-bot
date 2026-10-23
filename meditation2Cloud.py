@@ -43,7 +43,7 @@ def self_ping():
         time.sleep(600)  # Ping every 10 minutes
 
 # Configuration
-BOT_TOKEN = os.getenv("BOT_TOKEN")
+BOT_TOKEN = os.getenv("8918523178:AAGbCHDffx0BdSB9edAC8xX27Y7CNyTjt_U")
 ADMIN_CHAT_ID = os.getenv("ADMIN_CHAT_ID", "528763406")
 
 # Your updated Print Sheet Web App URL
