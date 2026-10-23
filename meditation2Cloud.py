@@ -3,6 +3,9 @@ import json
 import html
 import time
 import requests
+import threading
+from flask import Flask
+from waitress import serve
 from telegram import Update, InlineKeyboardButton, InlineKeyboardMarkup, ReplyKeyboardRemove
 from telegram.ext import (
     Application,
@@ -14,11 +17,21 @@ from telegram.ext import (
     filters,
 )
 
+# 1. Flask Health Check Server for Render
+web_app = Flask(__name__)
+
+@web_app.route('/')
+def health_check():
+    return "Bot is alive!", 200
+
+def run_flask():
+    port = int(os.environ.get("PORT", 10000))
+    serve(web_app, host="0.0.0.0", port=port)
+
 # Configuration
-BOT_TOKEN = "8918523178:AAGbCHDffx0BdSB9edAC8xX27Y7CNyTjt_U"
+BOT_TOKEN = os.getenv("BOT_TOKEN", "8918523178:AAGbCHDffx0BdSB9edAC8xX27Y7CNyTjt_U")
 ADMIN_CHAT_ID = os.getenv("ADMIN_CHAT_ID", "528763406")
 
-# Your updated Print Sheet Web App URL
 GOOGLE_SHEET_WEB_APP_URL = "https://script.google.com/macros/s/AKfycbyvHBqPoe-HyMZA7mGDvoVLQKpSgEnUtiypa_J1wXlQ3jIyqGMgwzWFtN7ypXoegKM5Ww/exec"
 
 MAX_REGISTRATIONS = 40
@@ -91,7 +104,6 @@ def reset_counter_file():
         json.dump({"count": 0}, f)
 
 def save_to_google_sheet(user_data):
-    """Pushes registration data including Name, Gender, Age, Phone, Expectation, and Receipt"""
     payload = {
         "name": user_data.get("name"),
         "gender": user_data.get("gender"),
@@ -121,16 +133,12 @@ async def start(update: Update, context: ContextTypes.DEFAULT_TYPE):
     return LANGUAGE
 
 async def set_language(update: Update, context: ContextTypes.DEFAULT_TYPE):
-    try:
-        query = update.callback_query
-        await query.answer()
-        lang = query.data
-        context.user_data['lang'] = lang
-        await query.edit_message_text(text=TEXTS[lang]['ask_name'])
-        return NAME
-    except Exception as e:
-        print(f"CRITICAL ERROR in set_language: {e}")
-        raise
+    query = update.callback_query
+    await query.answer()
+    lang = query.data
+    context.user_data['lang'] = lang
+    await query.edit_message_text(text=TEXTS[lang]['ask_name'])
+    return NAME
 
 async def handle_voice_input(update: Update, context: ContextTypes.DEFAULT_TYPE):
     lang = context.user_data.get('lang', 'KM')
@@ -189,9 +197,7 @@ async def get_payment(update: Update, context: ContextTypes.DEFAULT_TYPE):
     photo = update.message.photo[-1]
     context.user_data['receipt'] = photo.file_id
 
-    # Save to your Google Sheet
     save_to_google_sheet(context.user_data)
-
     new_count = increment_counter()
     
     user = update.effective_user
@@ -211,3 +217,75 @@ async def get_payment(update: Update, context: ContextTypes.DEFAULT_TYPE):
         expectation=context.user_data['expectation'],
         tg_user=tg_user
     )
+    
+    await context.bot.send_photo(
+        chat_id=ADMIN_CHAT_ID,
+        photo=photo.file_id,
+        caption=admin_text,
+        parse_mode="HTML"
+    )
+    return ConversationHandler.END
+
+async def reset_counter(update: Update, context: ContextTypes.DEFAULT_TYPE):
+    if str(update.effective_user.id) != str(ADMIN_CHAT_ID):
+        return
+    reset_counter_file()
+    await update.message.reply_text("🔄 Registration counter has been reset to 0!")
+
+async def check_status(update: Update, context: ContextTypes.DEFAULT_TYPE):
+    if str(update.effective_user.id) != str(ADMIN_CHAT_ID):
+        return
+    count = get_counter()
+    await update.message.reply_text(f"📊 Current Registrations: {count}/40")
+
+async def cancel(update: Update, context: ContextTypes.DEFAULT_TYPE):
+    await update.message.reply_text("Registration cancelled.", reply_markup=ReplyKeyboardRemove())
+    return ConversationHandler.END
+
+def main():
+    # Start Flask background thread for Render port binding
+    threading.Thread(target=run_flask, daemon=True).start()
+
+    app = Application.builder().token(BOT_TOKEN).build()
+
+    conv_handler = ConversationHandler(
+        entry_points=[CommandHandler('start', start)],
+        states={
+            LANGUAGE: [CallbackQueryHandler(set_language)],
+            NAME: [
+                MessageHandler(filters.VOICE | filters.AUDIO, handle_voice_input),
+                MessageHandler(filters.TEXT & ~filters.COMMAND, get_name)
+            ],
+            GENDER: [
+                MessageHandler(filters.VOICE | filters.AUDIO, handle_voice_input),
+                MessageHandler(filters.TEXT & ~filters.COMMAND, get_gender)
+            ],
+            AGE: [
+                MessageHandler(filters.VOICE | filters.AUDIO, handle_voice_input),
+                MessageHandler(filters.TEXT & ~filters.COMMAND, get_age)
+            ],
+            PHONE: [
+                MessageHandler(filters.VOICE | filters.AUDIO, handle_voice_input),
+                MessageHandler(filters.TEXT & ~filters.COMMAND, get_phone)
+            ],
+            EXPECTATION: [
+                MessageHandler(filters.VOICE | filters.AUDIO, handle_voice_input),
+                MessageHandler(filters.TEXT & ~filters.COMMAND, get_expectation)
+            ],
+            PAYMENT: [
+                MessageHandler(filters.VOICE | filters.AUDIO, handle_voice_input),
+                MessageHandler(filters.PHOTO, get_payment)
+            ],
+        },
+        fallbacks=[CommandHandler('cancel', cancel)],
+    )
+
+    app.add_handler(conv_handler)
+    app.add_handler(CommandHandler("reset", reset_counter))
+    app.add_handler(CommandHandler("status", check_status))
+
+    print("Meditation Bot is running on Render...")
+    app.run_polling(drop_pending_updates=True, stop_signals=None)
+
+if __name__ == '__main__':
+    main()
